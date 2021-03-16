@@ -1,0 +1,37 @@
+version: '3'
+services:
+  # MariaDB Service
+  walter_mysql:
+    image: mariadb:latest
+    command: '--innodb-flush-method=fsync --innodb_use_native_aio=0 --log_bin=ON'
+    container_name: walter_mysql
+    #ports:
+    #  - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=walterCode
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./src/Migrations/DataBase.sql:/docker-entrypoint-initdb.d/DataBase.sql
+  # PHP MyAdmin Service
+  incubator_pma:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: walter_pma
+    ports:
+      - "8100:80"
+    environment:
+      - PMA_HOST=walter_mysql
+      - PMA_PORT=3306
+  node_app:
+    container_name: walter_app
+    ports:
+      - "4000:4000"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - MYSQL_ROOT_PASSWORD=walterCode
+volumes:
+  mysql:
